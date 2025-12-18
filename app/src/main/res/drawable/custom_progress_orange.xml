@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- BACKGROUND TRACK (Full height) -->
+    <item android:id="@android:id/background">
+        <shape>
+            <corners android:radius="8dp" />
+            <solid android:color="#FFE0B2" />  <!-- Light orange background -->
+            <size android:height="60dp" />
+        </shape>
+    </item>
+
+    <!-- PROGRESS FILL (Matches full height) -->
+    <item android:id="@android:id/progress">
+        <clip>
+            <shape>
+                <corners android:radius="8dp" />
+                <solid android:color="#FF9800" />  <!-- Orange progress color -->
+                <size android:height="60dp" />
+            </shape>
+        </clip>
+    </item>
+
+</layer-list>
