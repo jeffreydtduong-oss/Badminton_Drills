@@ -9,3 +9,4 @@ Below are the features of this app:
 - Once the second timer depletes, the process repeats and a random number will flash again. The expectation is that the user will have returned to the center at this time, and split step once they see the flashd number
 - After one rep, this gets counted and incremented in the Rep Counter at the bottom. The user can choose to have the training terminate after a set number of reps are completed in the Settings menu (or just have it run continuously until they hit the "Stop" button)
 - Additionally, the app will play out the sounds at each stage. If the user doesn't want that they can turn off the Sound Toggle at the top
+- Added a new mode that lets you select another drill type. The other drill option right now incorporates shot selection, and only applies to a court with 4 sections
