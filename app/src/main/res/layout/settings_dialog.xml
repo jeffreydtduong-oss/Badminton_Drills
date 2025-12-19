@@ -9,61 +9,284 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Shuttle Number Range -->
+        <!-- Drill Selection -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Shuttle Number Range"
+            android:text="Current Drill"
             android:textSize="14sp"
             android:textStyle="bold"
             android:layout_marginBottom="8dp" />
 
+        <TextView
+            android:id="@+id/currentDrillText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Drill #1 - Random Footwork"
+            android:textSize="12sp"
+            android:layout_marginBottom="24dp"
+            android:textColor="#1976D2" />
+
+        <!-- Drill 1 Settings - Shuttle Number Range (Visible for Drill 1 only) -->
         <LinearLayout
+            android:id="@+id/drill1Settings"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="16dp">
+            android:orientation="vertical"
+            android:visibility="visible">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Min:"
-                android:textSize="12sp"
-                android:layout_marginEnd="8dp" />
+                android:text="Sections of the Court"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
 
-            <EditText
-                android:id="@+id/minShuttleNumberEdit"
-                android:layout_width="0dp"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:inputType="number"
-                android:text="1"
-                android:textSize="12sp"
-                android:padding="8dp"
-                android:background="@drawable/edit_text_bg"
-                android:layout_marginEnd="16dp" />
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Max:"
-                android:textSize="12sp"
-                android:layout_marginEnd="8dp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Min:"
+                    android:textSize="12sp"
+                    android:layout_marginEnd="8dp" />
 
-            <EditText
-                android:id="@+id/maxShuttleNumberEdit"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:inputType="number"
-                android:text="4"
-                android:textSize="12sp"
-                android:padding="8dp"
-                android:background="@drawable/edit_text_bg" />
+                <EditText
+                    android:id="@+id/minShuttleNumberEdit"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:inputType="number"
+                    android:text="1"
+                    android:textSize="12sp"
+                    android:padding="8dp"
+                    android:background="@drawable/edit_text_bg"
+                    android:layout_marginEnd="16dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Max:"
+                    android:textSize="12sp"
+                    android:layout_marginEnd="8dp" />
+
+                <EditText
+                    android:id="@+id/maxShuttleNumberEdit"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:inputType="number"
+                    android:text="4"
+                    android:textSize="12sp"
+                    android:padding="8dp"
+                    android:background="@drawable/edit_text_bg" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
-        <!-- Number Display Time -->
+        <!-- Drill 2 Settings - Shot Probabilities (Visible for Drill 2 only) -->
+        <LinearLayout
+            android:id="@+id/drill2Settings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Shot Probabilities (Drill 2 Only)"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+
+            <!-- Shuttle 1 & 2 Shot Probabilities -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Shuttle 1 and 2 (Front Court)"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="4dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Net Shot:"
+                    android:textSize="12sp" />
+
+                <EditText
+                    android:id="@+id/netProbEdit"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:text="50"
+                    android:textSize="12sp"
+                    android:padding="4dp"
+                    android:background="@drawable/edit_text_bg" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="%"
+                    android:textSize="12sp"
+                    android:layout_marginStart="4dp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Lift:"
+                    android:textSize="12sp" />
+
+                <EditText
+                    android:id="@+id/liftProbEdit"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:text="50"
+                    android:textSize="12sp"
+                    android:padding="4dp"
+                    android:background="@drawable/edit_text_bg" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="%"
+                    android:textSize="12sp"
+                    android:layout_marginStart="4dp" />
+
+            </LinearLayout>
+
+            <!-- Shuttle 3 & 4 Shot Probabilities -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Shuttle 3 and 4 (Rear Court)"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="4dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Drop Shot:"
+                    android:textSize="12sp" />
+
+                <EditText
+                    android:id="@+id/dropProbEdit"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:text="40"
+                    android:textSize="12sp"
+                    android:padding="4dp"
+                    android:background="@drawable/edit_text_bg" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="%"
+                    android:textSize="12sp"
+                    android:layout_marginStart="4dp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Clear:"
+                    android:textSize="12sp" />
+
+                <EditText
+                    android:id="@+id/clearProbEdit"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:text="40"
+                    android:textSize="12sp"
+                    android:padding="4dp"
+                    android:background="@drawable/edit_text_bg" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="%"
+                    android:textSize="12sp"
+                    android:layout_marginStart="4dp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="24dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Smash:"
+                    android:textSize="12sp" />
+
+                <EditText
+                    android:id="@+id/smashProbEdit"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:text="20"
+                    android:textSize="12sp"
+                    android:padding="4dp"
+                    android:background="@drawable/edit_text_bg" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="%"
+                    android:textSize="12sp"
+                    android:layout_marginStart="4dp" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Number Display Time (Common to both drills) -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -98,14 +321,23 @@
 
         </LinearLayout>
 
+        <!-- Common Settings (Visible for both drills) -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Common Settings"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
         <!-- Time to Shuttle Section -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Time to Shuttle (seconds)"
-            android:textSize="14sp"
+            android:textSize="12sp"
             android:textStyle="bold"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginBottom="4dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -157,9 +389,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Time Back to Center (seconds)"
-            android:textSize="14sp"
+            android:textSize="12sp"
             android:textStyle="bold"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginBottom="4dp" />
 
         <LinearLayout
             android:layout_width="match_parent"

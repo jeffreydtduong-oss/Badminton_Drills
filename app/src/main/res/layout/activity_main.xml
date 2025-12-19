@@ -25,7 +25,7 @@
             android:text="Sound"
             android:textSize="12sp"
             android:checked="true"
-            android:layout_marginEnd="16dp"
+            android:layout_marginEnd="8dp"
             android:thumbTint="@color/white"
             android:trackTint="@color/design_default_color_primary" />
 
@@ -36,7 +36,30 @@
             android:layout_height="wrap_content"
             android:text="Settings"
             android:textSize="12sp"
-            android:layout_marginEnd="16dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:layout_marginEnd="8dp"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:background="@drawable/button_primary_bg"
+            android:textColor="@color/white" />
+
+        <!-- Drill Selection Button -->
+        <Button
+            android:id="@+id/drillSelectButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Drill"
+            android:textSize="12sp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:layout_marginEnd="8dp"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
             android:background="@drawable/button_primary_bg"
             android:textColor="@color/white" />
 
@@ -46,12 +69,32 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="START"
-            android:textSize="14sp"
+            android:textSize="12sp"
             android:textStyle="bold"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
             android:background="@drawable/button_start_bg"
             android:textColor="@color/white" />
 
     </LinearLayout>
+
+    <!-- Drill Name Display -->
+    <TextView
+        android:id="@+id/drillNameText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Drill #1 - Random Footwork"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#1976D2"
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/topControls" />
 
     <!-- Main Content Area -->
     <LinearLayout
@@ -64,7 +107,7 @@
         app:layout_constraintBottom_toTopOf="@+id/bottomControls"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/topControls">
+        app:layout_constraintTop_toBottomOf="@+id/drillNameText">
 
         <!-- Countdown Text (for Ready, Set, Go) -->
         <TextView
@@ -88,7 +131,18 @@
             android:textStyle="bold"
             android:textColor="#1976D2"
             android:visibility="gone"
-            android:layout_marginBottom="32dp" />
+            android:layout_marginBottom="16dp" />
+
+        <!-- Shot Choice Text (for Drill 2) -->
+        <TextView
+            android:id="@+id/shotChoiceText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="48sp"
+            android:textStyle="bold"
+            android:textColor="#FF5722"
+            android:visibility="gone"
+            android:layout_marginBottom="16dp" />
 
         <!-- Status Text -->
         <TextView
