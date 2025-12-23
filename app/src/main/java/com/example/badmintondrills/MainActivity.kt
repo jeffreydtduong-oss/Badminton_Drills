@@ -681,7 +681,7 @@ class MainActivity : AppCompatActivity() {
                                 val frontTotal = netProb + liftProb
                                 if (frontTotal != 100) {
                                     validationFailed = true
-                                    errorMessage = "Front court shot probabilities must sum to exactly 100% (currently $frontTotal%)"
+                                    errorMessage = "Sum of Front court shots: $frontTotal% (must be 100%)"
                                 }
                             }
 
@@ -690,7 +690,7 @@ class MainActivity : AppCompatActivity() {
                                 val rearTotal = dropProb + clearProb + smashProb
                                 if (rearTotal != 100) {
                                     validationFailed = true
-                                    errorMessage = "Rear court shot probabilities must sum to exactly 100% (currently $rearTotal%)"
+                                    errorMessage = "Sum of Rear court shots: $rearTotal% (must be 100%)"
                                 }
                             }
 
