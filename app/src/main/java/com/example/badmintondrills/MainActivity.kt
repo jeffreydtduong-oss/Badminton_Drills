@@ -94,6 +94,28 @@ class MainActivity : AppCompatActivity() {
     // For Drill 2
     private var shotChoice = ""
 
+    // UI Elements - Add direction arrow text view
+    private lateinit var directionArrowText: TextView
+
+    // Add these constants for directions
+    companion object {
+        private val FRONT_COURT_SHOTS = listOf("net", "lift")
+        private val REAR_COURT_SHOTS = listOf("drop", "clear", "smash")
+        private val NET_DIRECTIONS = listOf("left", "middle", "right")
+        private val LIFT_DIRECTIONS = listOf("left", "right")
+        private val DROP_DIRECTIONS = listOf("left", "middle", "right")
+        private val CLEAR_DIRECTIONS = listOf("left", "right")
+        private val SMASH_DIRECTIONS = listOf("left", "middle", "right")
+        private val ARROW_SYMBOLS = mapOf(
+            "left" to "←",
+            "middle" to "↓",  // or "•" or "●"
+            "right" to "→"
+        )
+    }
+
+    // Add direction variable
+    private var shotDirection = ""
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -140,8 +162,8 @@ class MainActivity : AppCompatActivity() {
         soundToggle = findViewById(R.id.soundToggle)
         drillSelectButton = findViewById(R.id.drillSelectButton)
         drillNameText = findViewById(R.id.drillNameText)
+        directionArrowText = findViewById(R.id.directionArrowText)
 
-        // REMOVE THIS LINE: updateDrillName()
     }
 
     private fun loadSettings() {
@@ -280,6 +302,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         shuttleNumberText.text = shuttleNumber.toString()
+        directionArrowText.visibility = View.GONE // Hide arrow initially
 
         // HIDE the status text
         countdownStatus.visibility = View.GONE
@@ -287,12 +310,36 @@ class MainActivity : AppCompatActivity() {
 
         // For Drill 2, also show shot choice
         if (settings.currentDrill == "drill2") {
-            shotChoice = getRandomShotForNumber(shuttleNumber)
-            shotChoiceText.text = shotChoice
+            val (shotType, direction) = getRandomShotAndDirection(shuttleNumber)
+            shotChoice = shotType
+            shotDirection = direction
+
+            // Update UI
+            shotChoiceText.text = when (shotType) {
+                "net" -> "Net shot"
+                "lift" -> "Lift"
+                "drop" -> "Drop shot"
+                "clear" -> "Clear"
+                "smash" -> "Smash"
+                else -> shotType
+            }
+
+            // Show direction arrow
+            directionArrowText.text = ARROW_SYMBOLS[direction] ?: ""
+            directionArrowText.visibility = View.VISIBLE
+
             shotChoiceText.visibility = View.VISIBLE
 
             if (settings.soundEnabled) {
-                speak("$shuttleNumber, $shotChoice")
+                val spokenText = when (shotType) {
+                    "net" -> "$shuttleNumber, net shot $direction"
+                    "lift" -> "$shuttleNumber, lift $direction"
+                    "drop" -> "$shuttleNumber, drop shot $direction"
+                    "clear" -> "$shuttleNumber, clear $direction"
+                    "smash" -> "$shuttleNumber, smash $direction"
+                    else -> "$shuttleNumber, $shotType"
+                }
+                speak(spokenText)
             }
         } else {
             shotChoiceText.visibility = View.GONE
@@ -306,6 +353,7 @@ class MainActivity : AppCompatActivity() {
         shuttleTimerRunnable = Runnable {
             shuttleNumberText.visibility = View.GONE
             shotChoiceText.visibility = View.GONE
+            directionArrowText.visibility = View.GONE // Hide arrow
             startTimeToShuttlePhase()
         }
 
@@ -427,8 +475,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateDisplay() {
-        // Hide shot choice text by default
+        // Hide shot choice and direction arrow text by default
         shotChoiceText.visibility = View.GONE
+        directionArrowText.visibility = View.GONE
 
         when (currentPhase) {
             Phase.IDLE -> {
@@ -453,18 +502,22 @@ class MainActivity : AppCompatActivity() {
                 timerBar2.visibility = View.GONE
                 timerText1.visibility = View.GONE
                 timerText2.visibility = View.GONE
-                // Note: shuttleNumberText and shotChoiceText visibility
+                // Note: shuttleNumberText, shotChoiceText, and directionArrowText visibility
                 // are handled separately in startShuttleNumberPhase()
             }
             Phase.TIME_TO_SHUTTLE -> {
                 countdownText.visibility = View.GONE
                 shuttleNumberText.visibility = View.GONE
+                shotChoiceText.visibility = View.GONE
+                directionArrowText.visibility = View.GONE
                 timerBar2.visibility = View.GONE
                 timerText2.visibility = View.GONE
             }
             Phase.TIME_TO_CENTER -> {
                 countdownText.visibility = View.GONE
                 shuttleNumberText.visibility = View.GONE
+                shotChoiceText.visibility = View.GONE
+                directionArrowText.visibility = View.GONE
                 timerBar1.visibility = View.GONE
                 timerText1.visibility = View.GONE
             }
@@ -559,22 +612,35 @@ class MainActivity : AppCompatActivity() {
             targetRepsEdit.isEnabled = checkedId == R.id.fixedRepsRadio
         }
 
-        AlertDialog.Builder(this)
+        // Create the dialog first with null positive button listener
+        val dialog = AlertDialog.Builder(this)
             .setTitle("Training Settings")
             .setView(dialogView)
-            .setPositiveButton("Save") { dialog, which ->
+            .setPositiveButton("Save", null) // Set to null initially
+            .setNegativeButton("Cancel") { dialog, which ->
+                dialog.dismiss()
+            }
+            .create()
+
+        // Set custom positive button listener to prevent automatic dismissal
+        dialog.setOnShowListener {
+            val positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            positiveButton.setOnClickListener {
                 try {
                     // Save COMMON settings (for both drills)
                     settings.timeToShuttleMin = timeToShuttleMinEdit.text.toString().toFloat()
                     settings.timeToShuttleMax = timeToShuttleMaxEdit.text.toString().toFloat()
                     settings.timeToCenterMin = timeToCenterMinEdit.text.toString().toFloat()
                     settings.timeToCenterMax = timeToCenterMaxEdit.text.toString().toFloat()
-                    settings.numberDisplayTime = numberDisplayTimeEdit.text.toString().toFloat() // COMMON
+                    settings.numberDisplayTime = numberDisplayTimeEdit.text.toString().toFloat()
 
                     settings.repMode = if (infiniteRepsRadio.isChecked) "infinite" else "fixed"
                     if (settings.repMode == "fixed") {
                         settings.targetReps = targetRepsEdit.text.toString().toInt()
                     }
+
+                    var validationFailed = false
+                    var errorMessage = ""
 
                     // Save drill-specific settings based on current drill
                     when (settings.currentDrill) {
@@ -585,8 +651,8 @@ class MainActivity : AppCompatActivity() {
 
                             // Validation for drill 1
                             if (settings.minShuttleNumber >= settings.maxShuttleNumber) {
-                                Toast.makeText(this, "Min number must be less than max number", Toast.LENGTH_SHORT).show()
-                                return@setPositiveButton
+                                validationFailed = true
+                                errorMessage = "Min number must be less than max number"
                             }
                         }
                         "drill2" -> {
@@ -597,62 +663,86 @@ class MainActivity : AppCompatActivity() {
                             val clearProb = clearProbEdit.text.toString().toInt()
                             val smashProb = smashProbEdit.text.toString().toInt()
 
-                            // Validation for drill 2
+                            // Enhanced validation for drill 2
+                            // Check for negative values
                             if (netProb < 0 || liftProb < 0 || dropProb < 0 || clearProb < 0 || smashProb < 0) {
-                                Toast.makeText(this, "Probabilities must be non-negative", Toast.LENGTH_SHORT).show()
-                                return@setPositiveButton
+                                validationFailed = true
+                                errorMessage = "Probabilities must be non-negative (0-100)"
                             }
 
-                            // For shuttle 1 & 2 (front court)
-                            val frontTotal = netProb + liftProb
-                            if (frontTotal <= 0) {
-                                Toast.makeText(this, "Front court shot probabilities must sum to > 0", Toast.LENGTH_SHORT).show()
-                                return@setPositiveButton
+                            // Check for values > 100
+                            if (!validationFailed && (netProb > 100 || liftProb > 100 || dropProb > 100 || clearProb > 100 || smashProb > 100)) {
+                                validationFailed = true
+                                errorMessage = "Probabilities must be ≤ 100%"
                             }
 
-                            // For shuttle 3 & 4 (rear court)
-                            val rearTotal = dropProb + clearProb + smashProb
-                            if (rearTotal <= 0) {
-                                Toast.makeText(this, "Rear court shot probabilities must sum to > 0", Toast.LENGTH_SHORT).show()
-                                return@setPositiveButton
+                            // For shuttle 1 & 2 (front court) - percentages must add up to 100%
+                            if (!validationFailed) {
+                                val frontTotal = netProb + liftProb
+                                if (frontTotal != 100) {
+                                    validationFailed = true
+                                    errorMessage = "Front court shot probabilities must sum to exactly 100% (currently $frontTotal%)"
+                                }
                             }
 
-                            // Save probabilities
-                            settings.shotProbabilities = mapOf(
-                                "net" to netProb,
-                                "lift" to liftProb,
-                                "drop" to dropProb,
-                                "clear" to clearProb,
-                                "smash" to smashProb
-                            )
+                            // For shuttle 3 & 4 (rear court) - percentages must add up to 100%
+                            if (!validationFailed) {
+                                val rearTotal = dropProb + clearProb + smashProb
+                                if (rearTotal != 100) {
+                                    validationFailed = true
+                                    errorMessage = "Rear court shot probabilities must sum to exactly 100% (currently $rearTotal%)"
+                                }
+                            }
+
+                            if (!validationFailed) {
+                                // Save probabilities
+                                settings.shotProbabilities = mapOf(
+                                    "net" to netProb,
+                                    "lift" to liftProb,
+                                    "drop" to dropProb,
+                                    "clear" to clearProb,
+                                    "smash" to smashProb
+                                )
+                            }
                         }
                     }
 
                     // COMMON validation (for both drills)
-                    if (settings.numberDisplayTime <= 0) {
-                        Toast.makeText(this, "Display time must be positive", Toast.LENGTH_SHORT).show()
-                        return@setPositiveButton
+                    if (!validationFailed && settings.numberDisplayTime <= 0) {
+                        validationFailed = true
+                        errorMessage = "Display time must be positive"
                     }
 
-                    if (settings.timeToShuttleMin > settings.timeToShuttleMax ||
-                        settings.timeToCenterMin > settings.timeToCenterMax) {
-                        Toast.makeText(this, "Min times must be less than or equal to max times", Toast.LENGTH_SHORT).show()
-                        return@setPositiveButton
+                    if (!validationFailed && (settings.timeToShuttleMin > settings.timeToShuttleMax ||
+                                settings.timeToCenterMin > settings.timeToCenterMax)) {
+                        validationFailed = true
+                        errorMessage = "Min times must be less than or equal to max times"
                     }
 
-                    if (settings.repMode == "fixed" && settings.targetReps <= 0) {
-                        Toast.makeText(this, "Target reps must be positive", Toast.LENGTH_SHORT).show()
-                        return@setPositiveButton
+                    if (!validationFailed && settings.repMode == "fixed" && settings.targetReps <= 0) {
+                        validationFailed = true
+                        errorMessage = "Target reps must be positive"
                     }
 
-                    saveSettings()
-                    Toast.makeText(this, "Settings saved", Toast.LENGTH_SHORT).show()
+                    if (validationFailed) {
+                        // Show error but don't dismiss dialog
+                        Toast.makeText(this@MainActivity, errorMessage, Toast.LENGTH_SHORT).show()
+                    } else {
+                        // All validation passed, save and dismiss
+                        saveSettings()
+                        Toast.makeText(this@MainActivity, "Settings saved", Toast.LENGTH_SHORT).show()
+                        dialog.dismiss()
+                    }
+
+                } catch (e: NumberFormatException) {
+                    Toast.makeText(this@MainActivity, "Please enter valid numbers in all fields", Toast.LENGTH_SHORT).show()
                 } catch (e: Exception) {
-                    Toast.makeText(this, "Invalid input values: ${e.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MainActivity, "Invalid input values: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
             }
-            .setNegativeButton("Cancel", null)
-            .show()
+        }
+
+        dialog.show()
     }
 
     override fun onDestroy() {
@@ -715,22 +805,30 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun getRandomShotForNumber(shuttleNumber: Int): String {
+    private fun getRandomShotAndDirection(shuttleNumber: Int): Pair<String, String> {
         return when (shuttleNumber) {
             1, 2 -> {
-                // Weighted selection based on probabilities
+                // Front court shots (net or lift)
                 val random = Random()
                 val total = (settings.shotProbabilities["net"] ?: 50) + (settings.shotProbabilities["lift"] ?: 50)
                 val randValue = random.nextInt(total)
 
-                if (randValue < (settings.shotProbabilities["net"] ?: 50)) {
-                    "Net shot"
+                val shotType = if (randValue < (settings.shotProbabilities["net"] ?: 50)) {
+                    "net"
                 } else {
-                    "Lift"
+                    "lift"
                 }
+
+                val direction = when (shotType) {
+                    "net" -> NET_DIRECTIONS.random()
+                    "lift" -> LIFT_DIRECTIONS.random()
+                    else -> "middle" // fallback
+                }
+
+                Pair(shotType, direction)
             }
             3, 4 -> {
-                // Weighted selection for 3 and 4
+                // Rear court shots (drop, clear, or smash)
                 val random = Random()
                 val dropProb = settings.shotProbabilities["drop"] ?: 40
                 val clearProb = settings.shotProbabilities["clear"] ?: 40
@@ -738,13 +836,22 @@ class MainActivity : AppCompatActivity() {
                 val total = dropProb + clearProb + smashProb
                 val randValue = random.nextInt(total)
 
-                when {
-                    randValue < dropProb -> "Drop shot"
-                    randValue < dropProb + clearProb -> "Clear"
-                    else -> "Smash"
+                val shotType = when {
+                    randValue < dropProb -> "drop"
+                    randValue < dropProb + clearProb -> "clear"
+                    else -> "smash"
                 }
+
+                val direction = when (shotType) {
+                    "drop" -> DROP_DIRECTIONS.random()
+                    "clear" -> CLEAR_DIRECTIONS.random()
+                    "smash" -> SMASH_DIRECTIONS.random()
+                    else -> "middle" // fallback
+                }
+
+                Pair(shotType, direction)
             }
-            else -> "Net shot" // fallback
+            else -> Pair("net", "middle") // fallback
         }
     }
 }

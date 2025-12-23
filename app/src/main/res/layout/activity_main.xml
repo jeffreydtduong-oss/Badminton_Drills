@@ -144,6 +144,17 @@
             android:visibility="gone"
             android:layout_marginBottom="16dp" />
 
+        <!-- Direction Arrow Text (for Drill 2) -->
+        <TextView
+            android:id="@+id/directionArrowText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="64sp"
+            android:textStyle="bold"
+            android:textColor="#FF5722"
+            android:visibility="gone"
+            android:layout_marginBottom="16dp" />
+
         <!-- Status Text -->
         <TextView
             android:id="@+id/countdownStatus"
