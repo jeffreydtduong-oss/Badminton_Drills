@@ -17,25 +17,23 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <!-- Sound Toggle -->
         <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/soundToggle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Sound"
-            android:textSize="12sp"
+            android:textSize="14sp"
             android:checked="true"
             android:layout_marginEnd="8dp"
             android:thumbTint="@color/white"
             android:trackTint="@color/design_default_color_primary" />
 
-        <!-- Settings Button -->
         <Button
             android:id="@+id/settingsButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Settings"
-            android:textSize="12sp"
+            android:textSize="14sp"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:paddingTop="8dp"
@@ -46,13 +44,12 @@
             android:background="@drawable/button_primary_bg"
             android:textColor="@color/white" />
 
-        <!-- Drill Selection Button -->
         <Button
             android:id="@+id/drillSelectButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Drill"
-            android:textSize="12sp"
+            android:textSize="14sp"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:paddingTop="8dp"
@@ -63,13 +60,12 @@
             android:background="@drawable/button_primary_bg"
             android:textColor="@color/white" />
 
-        <!-- Start/Stop Button -->
         <Button
             android:id="@+id/startStopButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="START"
-            android:textSize="12sp"
+            android:textSize="14sp"
             android:textStyle="bold"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
@@ -88,7 +84,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Drill #1 - Random Footwork"
-        android:textSize="16sp"
+        android:textSize="18sp"
         android:textStyle="bold"
         android:textColor="#1976D2"
         android:layout_marginTop="8dp"
@@ -109,51 +105,70 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/drillNameText">
 
-        <!-- Countdown Text (for Ready, Set, Go) -->
-        <TextView
-            android:id="@+id/countdownText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="72sp"
-            android:textStyle="bold"
-            android:textColor="#2196F3"
-            android:visibility="gone"
-            android:layout_marginBottom="32dp" />
+        <!-- FrameLayout to keep countdown truly centered -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
 
-        <!-- Shuttle Number Text -->
-        <TextView
-            android:id="@+id/shuttleNumberText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="150sp"
-            android:maxLines="1"
-            android:ellipsize="end"
-            android:textStyle="bold"
-            android:textColor="#1976D2"
-            android:visibility="gone"
-            android:layout_marginBottom="16dp" />
+            <!-- Countdown Text (centered in FrameLayout) -->
+            <TextView
+                android:id="@+id/countdownText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="96sp"
+                android:textStyle="bold"
+                android:textColor="#2196F3"
+                android:visibility="gone"
+                android:layout_gravity="center" />
 
-        <!-- Shot Choice Text (for Drill 2) -->
-        <TextView
-            android:id="@+id/shotChoiceText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="48sp"
-            android:textStyle="bold"
-            android:textColor="#FF5722"
-            android:visibility="gone"
-            android:layout_marginBottom="16dp" />
+            <!-- Dynamic Content Container (Shuttle Number + Shot Info) -->
+            <LinearLayout
+                android:id="@+id/dynamicContentContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:visibility="visible"
+                android:layout_gravity="center">
 
-        <!-- Direction Arrow Text (for Drill 2) -->
-        <TextView
-            android:id="@+id/directionArrowText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="64sp"
-            android:textStyle="bold"
-            android:textColor="#FF5722"
-            android:visibility="gone"
-            android:layout_marginBottom="16dp" />
+                <!-- Shuttle Number Text -->
+                <TextView
+                    android:id="@+id/shuttleNumberText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="180sp"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:textStyle="bold"
+                    android:textColor="#1976D2"
+                    android:visibility="gone"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- Shot Choice Text (for Drill 2) -->
+                <TextView
+                    android:id="@+id/shotChoiceText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="56sp"
+                    android:textStyle="bold"
+                    android:textColor="#FF5722"
+                    android:visibility="gone"
+                    android:layout_marginBottom="8dp" />
+
+                <!-- Direction Arrow Text (for Drill 2) -->
+                <TextView
+                    android:id="@+id/directionArrowText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="80sp"
+                    android:textStyle="bold"
+                    android:textColor="#FF5722"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+        </FrameLayout>
 
         <!-- Status Text -->
         <TextView
@@ -161,65 +176,39 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Press START to begin"
-            android:textSize="18sp"
+            android:textSize="20sp"
             android:textColor="#333333"
-            android:layout_marginBottom="32dp" />
+            android:layout_marginBottom="8dp" />
 
-        <!-- Time to Shuttle Timer -->
+        <!-- Single Timer Container (reused for both phases) -->
         <LinearLayout
+            android:id="@+id/timerContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
-            android:layout_marginBottom="24dp">
+            android:layout_marginBottom="16dp"
+            android:minHeight="100dp"><!-- Fixed minimum height to prevent jumping -->
 
             <ProgressBar
-                android:id="@+id/timerBar1"
+                android:id="@+id/timerBar"
                 style="?android:attr/progressBarStyleHorizontal"
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
                 android:max="1000"
                 android:progress="1000"
                 android:progressDrawable="@drawable/custom_progress_green"
-                android:visibility="gone" />
+                android:visibility="invisible" /><!-- Start invisible instead of gone -->
 
             <TextView
-                android:id="@+id/timerText1"
+                android:id="@+id/timerText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="16sp"
+                android:textSize="18sp"
                 android:textColor="#333333"
+                android:textStyle="bold"
                 android:layout_marginTop="8dp"
-                android:visibility="gone" />
-
-        </LinearLayout>
-
-        <!-- Time to Center Timer -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:layout_marginBottom="24dp">
-
-            <ProgressBar
-                android:id="@+id/timerBar2"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="match_parent"
-                android:layout_height="60dp"
-                android:max="1000"
-                android:progress="1000"
-                android:progressDrawable="@drawable/custom_progress_orange"
-                android:visibility="gone" />
-
-            <TextView
-                android:id="@+id/timerText2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="16sp"
-                android:textColor="#333333"
-                android:layout_marginTop="8dp"
-                android:visibility="gone" />
+                android:visibility="invisible" /><!-- Start invisible instead of gone -->
 
         </LinearLayout>
 
@@ -246,7 +235,7 @@
             android:layout_height="wrap_content"
             android:text="Reps: 0"
             android:textColor="#333333"
-            android:textSize="24sp"
+            android:textSize="28sp"
             android:textStyle="bold" />
 
     </LinearLayout>

@@ -44,14 +44,14 @@ class MainActivity : AppCompatActivity() {
     private lateinit var countdownText: TextView
     private lateinit var countdownStatus: TextView
     private lateinit var shuttleNumberText: TextView
-    private lateinit var timerBar1: ProgressBar
-    private lateinit var timerBar2: ProgressBar
-    private lateinit var timerText1: TextView
-    private lateinit var timerText2: TextView
+    private lateinit var timerBar: ProgressBar
+    private lateinit var timerText: TextView
+    private lateinit var timerContainer: LinearLayout
     private lateinit var repCounterText: TextView
     private lateinit var startStopButton: Button
     private lateinit var settingsButton: Button
     private lateinit var soundToggle: SwitchCompat
+    private lateinit var dynamicContentContainer: LinearLayout
 
     // State Variables
     private var isRunning = false
@@ -152,18 +152,19 @@ class MainActivity : AppCompatActivity() {
         countdownStatus = findViewById(R.id.countdownStatus)
         shuttleNumberText = findViewById(R.id.shuttleNumberText)
         shotChoiceText = findViewById(R.id.shotChoiceText)
-        timerBar1 = findViewById(R.id.timerBar1)
-        timerBar2 = findViewById(R.id.timerBar2)
-        timerText1 = findViewById(R.id.timerText1)
-        timerText2 = findViewById(R.id.timerText2)
+        directionArrowText = findViewById(R.id.directionArrowText)
+        dynamicContentContainer = findViewById(R.id.dynamicContentContainer)
+
+        timerBar = findViewById(R.id.timerBar)
+        timerText = findViewById(R.id.timerText)
+        timerContainer = findViewById(R.id.timerContainer)
+
         repCounterText = findViewById(R.id.repCounterText)
         startStopButton = findViewById(R.id.startStopButton)
         settingsButton = findViewById(R.id.settingsButton)
         soundToggle = findViewById(R.id.soundToggle)
         drillSelectButton = findViewById(R.id.drillSelectButton)
         drillNameText = findViewById(R.id.drillNameText)
-        directionArrowText = findViewById(R.id.directionArrowText)
-
     }
 
     private fun loadSettings() {
@@ -253,6 +254,12 @@ class MainActivity : AppCompatActivity() {
         countdownIndex = 0
         countdownSeconds = 5
 
+        // Make sure countdown text is visible and centered
+        countdownText.visibility = View.VISIBLE
+        dynamicContentContainer.visibility = View.GONE
+        timerBar.visibility = View.INVISIBLE
+        timerText.visibility = View.INVISIBLE
+
         countdownHandler = Handler(Looper.getMainLooper())
         countdownRunnable = object : Runnable {
             override fun run() {
@@ -261,25 +268,24 @@ class MainActivity : AppCompatActivity() {
                 when (countdownIndex) {
                     0 -> {
                         countdownText.text = countdownWords[0]
-                        countdownText.visibility = View.VISIBLE
                         if (settings.soundEnabled) speak(countdownWords[0])
                         countdownIndex++
-                        countdownHandler?.postDelayed(this, 1500) // 1.5 seconds for "Ready"
+                        countdownHandler?.postDelayed(this, 1500)
                     }
                     1 -> {
                         countdownText.text = countdownWords[1]
                         if (settings.soundEnabled) speak(countdownWords[1])
                         countdownIndex++
-                        countdownHandler?.postDelayed(this, 1500) // 1.5 seconds for "Set"
+                        countdownHandler?.postDelayed(this, 1500)
                     }
                     2 -> {
                         countdownText.text = countdownWords[2]
                         if (settings.soundEnabled) speak(countdownWords[2])
                         countdownIndex++
-                        countdownHandler?.postDelayed(this, 2000) // 2 seconds for "Go"
+                        countdownHandler?.postDelayed(this, 2000)
                     }
                     3 -> {
-                        // Countdown complete, start shuttle number phase
+                        // Countdown complete
                         countdownText.visibility = View.GONE
                         currentPhase = Phase.SHUTTLE_NUMBER
                         startShuttleNumberPhase()
@@ -292,21 +298,21 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startShuttleNumberPhase() {
-        // Randomly select shuttle number between min and max (inclusive)
+        // Randomly select shuttle number
         shuttleNumber = if (settings.currentDrill == "drill2") {
-            // For drill 2, always 1-4
             (1..4).random()
         } else {
-            // For drill 1, use configured range
             (settings.minShuttleNumber..settings.maxShuttleNumber).random()
         }
 
+        // Make sure dynamic content container is visible
+        dynamicContentContainer.visibility = View.VISIBLE
+
         shuttleNumberText.text = shuttleNumber.toString()
-        directionArrowText.visibility = View.GONE // Hide arrow initially
+        shuttleNumberText.visibility = View.VISIBLE
 
         // HIDE the status text
         countdownStatus.visibility = View.GONE
-        shuttleNumberText.visibility = View.VISIBLE
 
         // For Drill 2, also show shot choice
         if (settings.currentDrill == "drill2") {
@@ -314,20 +320,19 @@ class MainActivity : AppCompatActivity() {
             shotChoice = shotType
             shotDirection = direction
 
-            // Update UI
+            // Update UI with larger text
             shotChoiceText.text = when (shotType) {
-                "net" -> "Net shot"
-                "lift" -> "Lift"
-                "drop" -> "Drop shot"
-                "clear" -> "Clear"
-                "smash" -> "Smash"
-                else -> shotType
+                "net" -> "NET SHOT"
+                "lift" -> "LIFT"
+                "drop" -> "DROP"
+                "clear" -> "CLEAR"
+                "smash" -> "SMASH"
+                else -> shotType.uppercase()
             }
 
             // Show direction arrow
             directionArrowText.text = ARROW_SYMBOLS[direction] ?: ""
             directionArrowText.visibility = View.VISIBLE
-
             shotChoiceText.visibility = View.VISIBLE
 
             if (settings.soundEnabled) {
@@ -343,21 +348,18 @@ class MainActivity : AppCompatActivity() {
             }
         } else {
             shotChoiceText.visibility = View.GONE
+            directionArrowText.visibility = View.GONE
             if (settings.soundEnabled) {
                 speak(shuttleNumber.toString())
             }
         }
 
-        // Show shuttle number (and shot choice) for configured time
+        // Show shuttle number for configured time
         shuttleTimerHandler = Handler(Looper.getMainLooper())
         shuttleTimerRunnable = Runnable {
-            shuttleNumberText.visibility = View.GONE
-            shotChoiceText.visibility = View.GONE
-            directionArrowText.visibility = View.GONE // Hide arrow
             startTimeToShuttlePhase()
         }
 
-        // Use the configured display time (convert seconds to milliseconds)
         val displayTimeMs = (settings.numberDisplayTime * 1000).toLong()
         shuttleTimerHandler?.postDelayed(shuttleTimerRunnable!!, displayTimeMs)
     }
@@ -373,33 +375,53 @@ class MainActivity : AppCompatActivity() {
         val totalMilliseconds = (timeToShuttleDuration * 1000).toLong()
         var elapsedMilliseconds = 0L
 
-        timerBar1.max = 1000
-        timerBar1.progress = 1000
-        timerText1.text = String.format("%.1f", timeToShuttleDuration)
-        timerBar1.visibility = View.VISIBLE
-        timerText1.visibility = View.VISIBLE
+        // Show timer bar (it's already taking up space because we use invisible instead of gone)
+        timerBar.max = 1000
+        timerBar.progress = 1000
+        timerBar.progressDrawable = getDrawable(R.drawable.custom_progress_green)
+        timerText.text = String.format("%.1f", timeToShuttleDuration)
+        timerBar.visibility = View.VISIBLE
+        timerText.visibility = View.VISIBLE
 
-        // ADD THIS LINE - Show the status text
+        // Show the status text
         countdownStatus.visibility = View.VISIBLE
         countdownStatus.text = "Time to shuttle:"
+
+        // Keep dynamic content visible for drill 2
+        if (settings.currentDrill == "drill2") {
+            // Content already visible, just make sure
+            dynamicContentContainer.visibility = View.VISIBLE
+            shuttleNumberText.visibility = View.VISIBLE
+            shotChoiceText.visibility = View.VISIBLE
+            directionArrowText.visibility = View.VISIBLE
+        } else {
+            // For drill 1, hide the dynamic content
+            dynamicContentContainer.visibility = View.GONE
+        }
 
         shuttleTimerHandler = Handler(Looper.getMainLooper())
         shuttleTimerRunnable = object : Runnable {
             override fun run() {
                 if (!isRunning) return
 
-                elapsedMilliseconds += 50 // Update every 50ms for smooth animation
+                elapsedMilliseconds += 50
 
                 val progress = (elapsedMilliseconds.toFloat() / totalMilliseconds.toFloat() * 1000).toInt()
                 val remainingTime = timeToShuttleDuration - (elapsedMilliseconds / 1000f)
 
-                timerBar1.progress = 1000 - progress
-                timerText1.text = String.format("%.1f", remainingTime)
+                timerBar.progress = 1000 - progress
+                timerText.text = String.format("%.1f", remainingTime)
 
                 if (elapsedMilliseconds >= totalMilliseconds) {
                     // Time to shuttle complete
-                    timerBar1.visibility = View.GONE
-                    timerText1.visibility = View.GONE
+                    timerBar.visibility = View.INVISIBLE  // Use invisible instead of gone
+                    timerText.visibility = View.INVISIBLE
+
+                    // Hide shot and direction after "Hit" command
+                    if (settings.currentDrill == "drill2") {
+                        dynamicContentContainer.visibility = View.GONE
+                    }
+
                     if (settings.soundEnabled) speak("Hit")
                     startTimeToCenterPhase()
                 } else {
@@ -422,33 +444,38 @@ class MainActivity : AppCompatActivity() {
         val totalMilliseconds = (timeToCenterDuration * 1000).toLong()
         var elapsedMilliseconds = 0L
 
-        timerBar2.max = 1000
-        timerBar2.progress = 1000
-        timerText2.text = String.format("%.1f", timeToCenterDuration)
-        timerBar2.visibility = View.VISIBLE
-        timerText2.visibility = View.VISIBLE
+        // Show timer bar again (same position)
+        timerBar.max = 1000
+        timerBar.progress = 1000
+        timerBar.progressDrawable = getDrawable(R.drawable.custom_progress_orange)
+        timerText.text = String.format("%.1f", timeToCenterDuration)
+        timerBar.visibility = View.VISIBLE
+        timerText.visibility = View.VISIBLE
 
-        // ADD THIS LINE - Show the status text
+        // Show the status text
         countdownStatus.visibility = View.VISIBLE
         countdownStatus.text = "Time back to center:"
+
+        // Hide dynamic content container
+        dynamicContentContainer.visibility = View.GONE
 
         centerTimerHandler = Handler(Looper.getMainLooper())
         centerTimerRunnable = object : Runnable {
             override fun run() {
                 if (!isRunning) return
 
-                elapsedMilliseconds += 50 // Update every 50ms for smooth animation
+                elapsedMilliseconds += 50
 
                 val progress = (elapsedMilliseconds.toFloat() / totalMilliseconds.toFloat() * 1000).toInt()
                 val remainingTime = timeToCenterDuration - (elapsedMilliseconds / 1000f)
 
-                timerBar2.progress = 1000 - progress
-                timerText2.text = String.format("%.1f", remainingTime)
+                timerBar.progress = 1000 - progress
+                timerText.text = String.format("%.1f", remainingTime)
 
                 if (elapsedMilliseconds >= totalMilliseconds) {
                     // Time to center complete
-                    timerBar2.visibility = View.GONE
-                    timerText2.visibility = View.GONE
+                    timerBar.visibility = View.INVISIBLE
+                    timerText.visibility = View.INVISIBLE
 
                     // Increment rep counter
                     currentRep++
@@ -461,8 +488,8 @@ class MainActivity : AppCompatActivity() {
                             "Training complete! Completed $currentRep reps.",
                             Toast.LENGTH_LONG).show()
                     } else {
-                        // Start next rep - HIDE STATUS TEXT BEFORE SHOWING NUMBER
-                        countdownStatus.visibility = View.GONE  // ← ADD THIS LINE
+                        // Start next rep
+                        countdownStatus.visibility = View.GONE
                         startShuttleNumberPhase()
                     }
                 } else {
@@ -475,51 +502,34 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateDisplay() {
-        // Hide shot choice and direction arrow text by default
-        shotChoiceText.visibility = View.GONE
-        directionArrowText.visibility = View.GONE
-
         when (currentPhase) {
             Phase.IDLE -> {
                 countdownText.visibility = View.GONE
-                shuttleNumberText.visibility = View.GONE
-                timerBar1.visibility = View.GONE
-                timerBar2.visibility = View.GONE
-                timerText1.visibility = View.GONE
-                timerText2.visibility = View.GONE
+                dynamicContentContainer.visibility = View.GONE
+                timerBar.visibility = View.INVISIBLE
+                timerText.visibility = View.INVISIBLE
                 countdownStatus.text = "Press START to begin"
             }
             Phase.COUNTDOWN -> {
-                shuttleNumberText.visibility = View.GONE
-                timerBar1.visibility = View.GONE
-                timerBar2.visibility = View.GONE
-                timerText1.visibility = View.GONE
-                timerText2.visibility = View.GONE
+                dynamicContentContainer.visibility = View.GONE
+                timerBar.visibility = View.INVISIBLE
+                timerText.visibility = View.INVISIBLE
+                countdownText.visibility = View.VISIBLE
             }
             Phase.SHUTTLE_NUMBER -> {
                 countdownText.visibility = View.GONE
-                timerBar1.visibility = View.GONE
-                timerBar2.visibility = View.GONE
-                timerText1.visibility = View.GONE
-                timerText2.visibility = View.GONE
-                // Note: shuttleNumberText, shotChoiceText, and directionArrowText visibility
-                // are handled separately in startShuttleNumberPhase()
+                timerBar.visibility = View.INVISIBLE
+                timerText.visibility = View.INVISIBLE
+                dynamicContentContainer.visibility = View.VISIBLE
             }
             Phase.TIME_TO_SHUTTLE -> {
                 countdownText.visibility = View.GONE
-                shuttleNumberText.visibility = View.GONE
-                shotChoiceText.visibility = View.GONE
-                directionArrowText.visibility = View.GONE
-                timerBar2.visibility = View.GONE
-                timerText2.visibility = View.GONE
+                // Timer and content visibility handled in startTimeToShuttlePhase()
             }
             Phase.TIME_TO_CENTER -> {
                 countdownText.visibility = View.GONE
-                shuttleNumberText.visibility = View.GONE
-                shotChoiceText.visibility = View.GONE
-                directionArrowText.visibility = View.GONE
-                timerBar1.visibility = View.GONE
-                timerText1.visibility = View.GONE
+                dynamicContentContainer.visibility = View.GONE
+                // Timer visibility handled in startTimeToCenterPhase()
             }
         }
     }
