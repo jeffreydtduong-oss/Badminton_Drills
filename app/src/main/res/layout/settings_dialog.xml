@@ -27,7 +27,7 @@
             android:layout_marginBottom="24dp"
             android:textColor="#1976D2" />
 
-        <!-- Drill 1 Settings - Shuttle Number Range (Visible for Drill 1 only) -->
+        <!-- Drill 1 Settings -->
         <LinearLayout
             android:id="@+id/drill1Settings"
             android:layout_width="match_parent"
@@ -88,9 +88,118 @@
 
             </LinearLayout>
 
+            <!-- Time to Shuttle Section for Drill 1 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Time to Shuttle (seconds)"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Min:"
+                    android:textSize="12sp"
+                    android:layout_marginEnd="8dp" />
+
+                <EditText
+                    android:id="@+id/timeToShuttleMinEdit"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:inputType="numberDecimal"
+                    android:text="1.0"
+                    android:textSize="12sp"
+                    android:padding="8dp"
+                    android:background="@drawable/edit_text_bg"
+                    android:layout_marginEnd="16dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Max:"
+                    android:textSize="12sp"
+                    android:layout_marginEnd="8dp" />
+
+                <EditText
+                    android:id="@+id/timeToShuttleMaxEdit"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:inputType="numberDecimal"
+                    android:text="3.0"
+                    android:textSize="12sp"
+                    android:padding="8dp"
+                    android:background="@drawable/edit_text_bg" />
+
+            </LinearLayout>
+
+            <!-- Time to Center Section for Drill 1 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Time Back to Center (seconds)"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="24dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Min:"
+                    android:textSize="12sp"
+                    android:layout_marginEnd="8dp" />
+
+                <EditText
+                    android:id="@+id/timeToCenterMinEdit"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:inputType="numberDecimal"
+                    android:text="1.0"
+                    android:textSize="12sp"
+                    android:padding="8dp"
+                    android:background="@drawable/edit_text_bg"
+                    android:layout_marginEnd="16dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Max:"
+                    android:textSize="12sp"
+                    android:layout_marginEnd="8dp" />
+
+                <EditText
+                    android:id="@+id/timeToCenterMaxEdit"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:inputType="numberDecimal"
+                    android:text="2.0"
+                    android:textSize="12sp"
+                    android:padding="8dp"
+                    android:background="@drawable/edit_text_bg" />
+
+            </LinearLayout>
+
         </LinearLayout>
 
-        <!-- Drill 2 Settings - Shot Probabilities (Visible for Drill 2 only) -->
+        <!-- Drill 2 Settings -->
         <LinearLayout
             android:id="@+id/drill2Settings"
             android:layout_width="match_parent"
@@ -284,6 +393,420 @@
 
             </LinearLayout>
 
+            <!-- Time to Shuttle Section for Drill 2 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Time to Shuttle (seconds)"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="24dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Min:"
+                    android:textSize="12sp"
+                    android:layout_marginEnd="8dp" />
+
+                <EditText
+                    android:id="@+id/timeToShuttleMinEdit2"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:inputType="numberDecimal"
+                    android:text="1.0"
+                    android:textSize="12sp"
+                    android:padding="8dp"
+                    android:background="@drawable/edit_text_bg"
+                    android:layout_marginEnd="16dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Max:"
+                    android:textSize="12sp"
+                    android:layout_marginEnd="8dp" />
+
+                <EditText
+                    android:id="@+id/timeToShuttleMaxEdit2"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:inputType="numberDecimal"
+                    android:text="3.0"
+                    android:textSize="12sp"
+                    android:padding="8dp"
+                    android:background="@drawable/edit_text_bg" />
+
+            </LinearLayout>
+
+            <!-- Shot-specific Time Back to Center Settings -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Time Back to Center (seconds per shot)"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp" />
+
+            <!-- Net Shot Time Range -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="12dp"
+                android:padding="8dp"
+                android:background="#F5F5F5">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Net Shot"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:textColor="#FF5722"
+                    android:layout_marginBottom="4dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Min:"
+                        android:textSize="12sp"
+                        android:layout_marginEnd="8dp" />
+
+                    <EditText
+                        android:id="@+id/netTimeMinEdit"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:inputType="numberDecimal"
+                        android:text="1.0"
+                        android:textSize="12sp"
+                        android:padding="8dp"
+                        android:background="@drawable/edit_text_bg"
+                        android:layout_marginEnd="16dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Max:"
+                        android:textSize="12sp"
+                        android:layout_marginEnd="8dp" />
+
+                    <EditText
+                        android:id="@+id/netTimeMaxEdit"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:inputType="numberDecimal"
+                        android:text="1.5"
+                        android:textSize="12sp"
+                        android:padding="8dp"
+                        android:background="@drawable/edit_text_bg" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="sec"
+                        android:textSize="12sp"
+                        android:layout_marginStart="8dp" />
+
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Lift Time Range -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="12dp"
+                android:padding="8dp"
+                android:background="#F5F5F5">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Lift"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:textColor="#4CAF50"
+                    android:layout_marginBottom="4dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Min:"
+                        android:textSize="12sp"
+                        android:layout_marginEnd="8dp" />
+
+                    <EditText
+                        android:id="@+id/liftTimeMinEdit"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:inputType="numberDecimal"
+                        android:text="1.5"
+                        android:textSize="12sp"
+                        android:padding="8dp"
+                        android:background="@drawable/edit_text_bg"
+                        android:layout_marginEnd="16dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Max:"
+                        android:textSize="12sp"
+                        android:layout_marginEnd="8dp" />
+
+                    <EditText
+                        android:id="@+id/liftTimeMaxEdit"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:inputType="numberDecimal"
+                        android:text="2.5"
+                        android:textSize="12sp"
+                        android:padding="8dp"
+                        android:background="@drawable/edit_text_bg" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="sec"
+                        android:textSize="12sp"
+                        android:layout_marginStart="8dp" />
+
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Drop Shot Time Range -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="12dp"
+                android:padding="8dp"
+                android:background="#F5F5F5">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Drop Shot"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:textColor="#2196F3"
+                    android:layout_marginBottom="4dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Min:"
+                        android:textSize="12sp"
+                        android:layout_marginEnd="8dp" />
+
+                    <EditText
+                        android:id="@+id/dropTimeMinEdit"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:inputType="numberDecimal"
+                        android:text="1.5"
+                        android:textSize="12sp"
+                        android:padding="8dp"
+                        android:background="@drawable/edit_text_bg"
+                        android:layout_marginEnd="16dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Max:"
+                        android:textSize="12sp"
+                        android:layout_marginEnd="8dp" />
+
+                    <EditText
+                        android:id="@+id/dropTimeMaxEdit"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:inputType="numberDecimal"
+                        android:text="2.0"
+                        android:textSize="12sp"
+                        android:padding="8dp"
+                        android:background="@drawable/edit_text_bg" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="sec"
+                        android:textSize="12sp"
+                        android:layout_marginStart="8dp" />
+
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Clear Time Range -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="12dp"
+                android:padding="8dp"
+                android:background="#F5F5F5">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Clear"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:textColor="#9C27B0"
+                    android:layout_marginBottom="4dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Min:"
+                        android:textSize="12sp"
+                        android:layout_marginEnd="8dp" />
+
+                    <EditText
+                        android:id="@+id/clearTimeMinEdit"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:inputType="numberDecimal"
+                        android:text="2.0"
+                        android:textSize="12sp"
+                        android:padding="8dp"
+                        android:background="@drawable/edit_text_bg"
+                        android:layout_marginEnd="16dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Max:"
+                        android:textSize="12sp"
+                        android:layout_marginEnd="8dp" />
+
+                    <EditText
+                        android:id="@+id/clearTimeMaxEdit"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:inputType="numberDecimal"
+                        android:text="3.0"
+                        android:textSize="12sp"
+                        android:padding="8dp"
+                        android:background="@drawable/edit_text_bg" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="sec"
+                        android:textSize="12sp"
+                        android:layout_marginStart="8dp" />
+
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Smash Time Range -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="24dp"
+                android:padding="8dp"
+                android:background="#F5F5F5">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Smash"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:textColor="#F44336"
+                    android:layout_marginBottom="4dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Min:"
+                        android:textSize="12sp"
+                        android:layout_marginEnd="8dp" />
+
+                    <EditText
+                        android:id="@+id/smashTimeMinEdit"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:inputType="numberDecimal"
+                        android:text="2.0"
+                        android:textSize="12sp"
+                        android:padding="8dp"
+                        android:background="@drawable/edit_text_bg"
+                        android:layout_marginEnd="16dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Max:"
+                        android:textSize="12sp"
+                        android:layout_marginEnd="8dp" />
+
+                    <EditText
+                        android:id="@+id/smashTimeMaxEdit"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:inputType="numberDecimal"
+                        android:text="2.5"
+                        android:textSize="12sp"
+                        android:padding="8dp"
+                        android:background="@drawable/edit_text_bg" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="sec"
+                        android:textSize="12sp"
+                        android:layout_marginStart="8dp" />
+
+                </LinearLayout>
+            </LinearLayout>
+
         </LinearLayout>
 
         <!-- Number Display Time (Common to both drills) -->
@@ -315,123 +838,6 @@
                 android:layout_weight="1"
                 android:inputType="numberDecimal"
                 android:text="0.5"
-                android:textSize="12sp"
-                android:padding="8dp"
-                android:background="@drawable/edit_text_bg" />
-
-        </LinearLayout>
-
-        <!-- Common Settings (Visible for both drills) -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Common Settings"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp" />
-
-        <!-- Time to Shuttle Section -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Time to Shuttle (seconds)"
-            android:textSize="12sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="4dp" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="16dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Min:"
-                android:textSize="12sp"
-                android:layout_marginEnd="8dp" />
-
-            <EditText
-                android:id="@+id/timeToShuttleMinEdit"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:inputType="numberDecimal"
-                android:text="1.0"
-                android:textSize="12sp"
-                android:padding="8dp"
-                android:background="@drawable/edit_text_bg"
-                android:layout_marginEnd="16dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Max:"
-                android:textSize="12sp"
-                android:layout_marginEnd="8dp" />
-
-            <EditText
-                android:id="@+id/timeToShuttleMaxEdit"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:inputType="numberDecimal"
-                android:text="3.0"
-                android:textSize="12sp"
-                android:padding="8dp"
-                android:background="@drawable/edit_text_bg" />
-
-        </LinearLayout>
-
-        <!-- Time to Center Section -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Time Back to Center (seconds)"
-            android:textSize="12sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="4dp" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="24dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Min:"
-                android:textSize="12sp"
-                android:layout_marginEnd="8dp" />
-
-            <EditText
-                android:id="@+id/timeToCenterMinEdit"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:inputType="numberDecimal"
-                android:text="1.0"
-                android:textSize="12sp"
-                android:padding="8dp"
-                android:background="@drawable/edit_text_bg"
-                android:layout_marginEnd="16dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Max:"
-                android:textSize="12sp"
-                android:layout_marginEnd="8dp" />
-
-            <EditText
-                android:id="@+id/timeToCenterMaxEdit"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:inputType="numberDecimal"
-                android:text="2.0"
                 android:textSize="12sp"
                 android:padding="8dp"
                 android:background="@drawable/edit_text_bg" />

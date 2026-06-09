@@ -2,7 +2,6 @@ package com.example.badmintondrills
 
 import android.os.*
 import android.speech.tts.TextToSpeech
-import android.util.Log
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
@@ -12,30 +11,53 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import com.google.gson.Gson
 import java.util.*
+import android.widget.EditText
+import android.widget.LinearLayout
+import android.widget.RadioButton
+import android.widget.RadioGroup
 
 data class TrainingSettings(
-    var currentDrill: String = "drill1", // "drill1" or "drill2"
-    var timeToShuttleMin: Float = 1.0f,
-    var timeToShuttleMax: Float = 3.0f,
-    var timeToCenterMin: Float = 1.0f,
-    var timeToCenterMax: Float = 2.0f,
-    var repMode: String = "infinite", // "infinite" or "fixed"
+    var currentDrill: String = "drill1",
+
+    // Drill 1 specific settings
+    var drill1TimeToShuttleMin: Float = 1.0f,
+    var drill1TimeToShuttleMax: Float = 3.0f,
+    var drill1TimeToCenterMin: Float = 1.0f,
+    var drill1TimeToCenterMax: Float = 2.0f,
+    var minShuttleNumber: Int = 1,
+    var maxShuttleNumber: Int = 4,
+
+    // Drill 2 specific settings
+    var drill2TimeToShuttleMin: Float = 1.0f,
+    var drill2TimeToShuttleMax: Float = 3.0f,
+    var numberDisplayTime: Float = 0.5f,
+    var repMode: String = "infinite",
     var targetReps: Int = 10,
     var soundEnabled: Boolean = true,
 
-    // Drill 1 specific
-    var minShuttleNumber: Int = 1,    // Minimum shuttle number (e.g., 1)
-    var maxShuttleNumber: Int = 4,    // Maximum shuttle number (e.g., 6)
-    var numberDisplayTime: Float = 0.5f,  // Time to display number in seconds
-
-    // Drill 2 specific - shot probabilities (percentages)
+    // Drill 2 shot probabilities
     var shotProbabilities: Map<String, Int> = mapOf(
         "net" to 50,
         "lift" to 50,
         "drop" to 40,
         "clear" to 40,
         "smash" to 20
+    ),
+
+    // Drill 2 shot-specific time back to center
+    var shotTimeToCenter: Map<String, ShotTimeRange> = mapOf(
+        "net" to ShotTimeRange(min = 1.0f, max = 1.5f),
+        "lift" to ShotTimeRange(min = 1.5f, max = 2.5f),
+        "drop" to ShotTimeRange(min = 1.5f, max = 2.0f),
+        "clear" to ShotTimeRange(min = 2.0f, max = 3.0f),
+        "smash" to ShotTimeRange(min = 2.0f, max = 2.5f)
     )
+)
+
+// New data class for time ranges
+data class ShotTimeRange(
+    var min: Float = 1.0f,
+    var max: Float = 2.0f
 )
 
 class MainActivity : AppCompatActivity() {
@@ -179,6 +201,9 @@ class MainActivity : AppCompatActivity() {
         } else {
             TrainingSettings()
         }
+
+        // Remove the old migration code that's causing the error
+        // Just use the settings as is
 
         soundToggle.isChecked = settings.soundEnabled
         repCounterText.text = "Reps: 0"
@@ -367,10 +392,16 @@ class MainActivity : AppCompatActivity() {
     private fun startTimeToShuttlePhase() {
         currentPhase = Phase.TIME_TO_SHUTTLE
 
+        // Get the appropriate time range based on current drill
+        val (minTime, maxTime) = if (settings.currentDrill == "drill1") {
+            Pair(settings.drill1TimeToShuttleMin, settings.drill1TimeToShuttleMax)
+        } else {
+            Pair(settings.drill2TimeToShuttleMin, settings.drill2TimeToShuttleMax)
+        }
+
         // Randomly select time between min and max
         val random = Random()
-        timeToShuttleDuration = settings.timeToShuttleMin +
-                random.nextFloat() * (settings.timeToShuttleMax - settings.timeToShuttleMin)
+        timeToShuttleDuration = minTime + random.nextFloat() * (maxTime - minTime)
 
         val totalMilliseconds = (timeToShuttleDuration * 1000).toLong()
         var elapsedMilliseconds = 0L
@@ -436,15 +467,29 @@ class MainActivity : AppCompatActivity() {
     private fun startTimeToCenterPhase() {
         currentPhase = Phase.TIME_TO_CENTER
 
+        // Get appropriate time range based on current drill
+        val (minTime, maxTime) = if (settings.currentDrill == "drill1") {
+            // For Drill 1, use the basic time to center
+            Pair(settings.drill1TimeToCenterMin, settings.drill1TimeToCenterMax)
+        } else {
+            // For Drill 2, use shot-specific time ranges
+            val timeRange = settings.shotTimeToCenter[shotChoice]
+            if (timeRange != null) {
+                Pair(timeRange.min, timeRange.max)
+            } else {
+                // Fallback if shot not found
+                Pair(1.0f, 2.0f)
+            }
+        }
+
         // Randomly select time between min and max
         val random = Random()
-        timeToCenterDuration = settings.timeToCenterMin +
-                random.nextFloat() * (settings.timeToCenterMax - settings.timeToCenterMin)
+        timeToCenterDuration = minTime + random.nextFloat() * (maxTime - minTime)
 
         val totalMilliseconds = (timeToCenterDuration * 1000).toLong()
         var elapsedMilliseconds = 0L
 
-        // Show timer bar again (same position)
+        // Show timer bar
         timerBar.max = 1000
         timerBar.progress = 1000
         timerBar.progressDrawable = getDrawable(R.drawable.custom_progress_orange)
@@ -452,9 +497,13 @@ class MainActivity : AppCompatActivity() {
         timerBar.visibility = View.VISIBLE
         timerText.visibility = View.VISIBLE
 
-        // Show the status text
+        // Show the status text with shot-specific info for Drill 2
         countdownStatus.visibility = View.VISIBLE
-        countdownStatus.text = "Time back to center:"
+        if (settings.currentDrill == "drill2" && shotChoice.isNotEmpty()) {
+            countdownStatus.text = "Time back to center after ${shotChoice.uppercase()}:"
+        } else {
+            countdownStatus.text = "Time back to center:"
+        }
 
         // Hide dynamic content container
         dynamicContentContainer.visibility = View.GONE
@@ -543,10 +592,8 @@ class MainActivity : AppCompatActivity() {
     private fun showSettingsDialog() {
         val dialogView = layoutInflater.inflate(R.layout.settings_dialog, null)
 
-        val timeToShuttleMinEdit = dialogView.findViewById<EditText>(R.id.timeToShuttleMinEdit)
-        val timeToShuttleMaxEdit = dialogView.findViewById<EditText>(R.id.timeToShuttleMaxEdit)
-        val timeToCenterMinEdit = dialogView.findViewById<EditText>(R.id.timeToCenterMinEdit)
-        val timeToCenterMaxEdit = dialogView.findViewById<EditText>(R.id.timeToCenterMaxEdit)
+        // Common views
+        val numberDisplayTimeEdit = dialogView.findViewById<EditText>(R.id.numberDisplayTimeEdit)
         val repModeRadioGroup = dialogView.findViewById<RadioGroup>(R.id.repModeRadioGroup)
         val targetRepsEdit = dialogView.findViewById<EditText>(R.id.targetRepsEdit)
         val infiniteRepsRadio = dialogView.findViewById<RadioButton>(R.id.infiniteRepsRadio)
@@ -560,16 +607,33 @@ class MainActivity : AppCompatActivity() {
         // Drill 1 specific fields
         val minShuttleNumberEdit = dialogView.findViewById<EditText>(R.id.minShuttleNumberEdit)
         val maxShuttleNumberEdit = dialogView.findViewById<EditText>(R.id.maxShuttleNumberEdit)
+        val timeToShuttleMinEdit = dialogView.findViewById<EditText>(R.id.timeToShuttleMinEdit)
+        val timeToShuttleMaxEdit = dialogView.findViewById<EditText>(R.id.timeToShuttleMaxEdit)
+        val timeToCenterMinEdit = dialogView.findViewById<EditText>(R.id.timeToCenterMinEdit)
+        val timeToCenterMaxEdit = dialogView.findViewById<EditText>(R.id.timeToCenterMaxEdit)
 
-        // COMMON field: Number display time (now common to both drills)
-        val numberDisplayTimeEdit = dialogView.findViewById<EditText>(R.id.numberDisplayTimeEdit)
+        // Drill 2 specific fields
+        val timeToShuttleMinEdit2 = dialogView.findViewById<EditText>(R.id.timeToShuttleMinEdit2)
+        val timeToShuttleMaxEdit2 = dialogView.findViewById<EditText>(R.id.timeToShuttleMaxEdit2)
 
-        // Drill 2 specific fields (shot probabilities)
+        // Drill 2 shot probabilities
         val netProbEdit = dialogView.findViewById<EditText>(R.id.netProbEdit)
         val liftProbEdit = dialogView.findViewById<EditText>(R.id.liftProbEdit)
         val dropProbEdit = dialogView.findViewById<EditText>(R.id.dropProbEdit)
         val clearProbEdit = dialogView.findViewById<EditText>(R.id.clearProbEdit)
         val smashProbEdit = dialogView.findViewById<EditText>(R.id.smashProbEdit)
+
+        // Drill 2 shot-specific time back to center fields
+        val netTimeMinEdit = dialogView.findViewById<EditText>(R.id.netTimeMinEdit)
+        val netTimeMaxEdit = dialogView.findViewById<EditText>(R.id.netTimeMaxEdit)
+        val liftTimeMinEdit = dialogView.findViewById<EditText>(R.id.liftTimeMinEdit)
+        val liftTimeMaxEdit = dialogView.findViewById<EditText>(R.id.liftTimeMaxEdit)
+        val dropTimeMinEdit = dialogView.findViewById<EditText>(R.id.dropTimeMinEdit)
+        val dropTimeMaxEdit = dialogView.findViewById<EditText>(R.id.dropTimeMaxEdit)
+        val clearTimeMinEdit = dialogView.findViewById<EditText>(R.id.clearTimeMinEdit)
+        val clearTimeMaxEdit = dialogView.findViewById<EditText>(R.id.clearTimeMaxEdit)
+        val smashTimeMinEdit = dialogView.findViewById<EditText>(R.id.smashTimeMinEdit)
+        val smashTimeMaxEdit = dialogView.findViewById<EditText>(R.id.smashTimeMaxEdit)
 
         // Set current drill display
         val drillName = when (settings.currentDrill) {
@@ -591,25 +655,52 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Set common values (including number display time)
-        timeToShuttleMinEdit.setText(settings.timeToShuttleMin.toString())
-        timeToShuttleMaxEdit.setText(settings.timeToShuttleMax.toString())
-        timeToCenterMinEdit.setText(settings.timeToCenterMin.toString())
-        timeToCenterMaxEdit.setText(settings.timeToCenterMax.toString())
-        targetRepsEdit.setText(settings.targetReps.toString())
-        numberDisplayTimeEdit.setText(settings.numberDisplayTime.toString()) // COMMON
-
-        // Set drill 1 specific values
+        // Load Drill 1 specific values
         minShuttleNumberEdit.setText(settings.minShuttleNumber.toString())
         maxShuttleNumberEdit.setText(settings.maxShuttleNumber.toString())
+        timeToShuttleMinEdit.setText(settings.drill1TimeToShuttleMin.toString())
+        timeToShuttleMaxEdit.setText(settings.drill1TimeToShuttleMax.toString())
+        timeToCenterMinEdit.setText(settings.drill1TimeToCenterMin.toString())
+        timeToCenterMaxEdit.setText(settings.drill1TimeToCenterMax.toString())
 
-        // Set drill 2 specific values (shot probabilities)
+        // Load Drill 2 specific values
+        timeToShuttleMinEdit2.setText(settings.drill2TimeToShuttleMin.toString())
+        timeToShuttleMaxEdit2.setText(settings.drill2TimeToShuttleMax.toString())
+
+        // Load common values
+        numberDisplayTimeEdit.setText(settings.numberDisplayTime.toString())
+        targetRepsEdit.setText(settings.targetReps.toString())
+
+        // Load Drill 2 shot probabilities
         netProbEdit.setText(settings.shotProbabilities["net"].toString())
         liftProbEdit.setText(settings.shotProbabilities["lift"].toString())
         dropProbEdit.setText(settings.shotProbabilities["drop"].toString())
         clearProbEdit.setText(settings.shotProbabilities["clear"].toString())
         smashProbEdit.setText(settings.shotProbabilities["smash"].toString())
 
+        // Load Drill 2 shot-specific time ranges
+        settings.shotTimeToCenter["net"]?.let {
+            netTimeMinEdit.setText(it.min.toString())
+            netTimeMaxEdit.setText(it.max.toString())
+        }
+        settings.shotTimeToCenter["lift"]?.let {
+            liftTimeMinEdit.setText(it.min.toString())
+            liftTimeMaxEdit.setText(it.max.toString())
+        }
+        settings.shotTimeToCenter["drop"]?.let {
+            dropTimeMinEdit.setText(it.min.toString())
+            dropTimeMaxEdit.setText(it.max.toString())
+        }
+        settings.shotTimeToCenter["clear"]?.let {
+            clearTimeMinEdit.setText(it.min.toString())
+            clearTimeMaxEdit.setText(it.max.toString())
+        }
+        settings.shotTimeToCenter["smash"]?.let {
+            smashTimeMinEdit.setText(it.min.toString())
+            smashTimeMaxEdit.setText(it.max.toString())
+        }
+
+        // Set rep mode
         if (settings.repMode == "infinite") {
             infiniteRepsRadio.isChecked = true
             targetRepsEdit.isEnabled = false
@@ -622,111 +713,146 @@ class MainActivity : AppCompatActivity() {
             targetRepsEdit.isEnabled = checkedId == R.id.fixedRepsRadio
         }
 
-        // Create the dialog first with null positive button listener
+        // Create the dialog
         val dialog = AlertDialog.Builder(this)
             .setTitle("Training Settings")
             .setView(dialogView)
-            .setPositiveButton("Save", null) // Set to null initially
+            .setPositiveButton("Save", null)
             .setNegativeButton("Cancel") { dialog, which ->
                 dialog.dismiss()
             }
             .create()
 
-        // Set custom positive button listener to prevent automatic dismissal
+        // Set custom positive button listener
         dialog.setOnShowListener {
             val positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
             positiveButton.setOnClickListener {
                 try {
-                    // Save COMMON settings (for both drills)
-                    settings.timeToShuttleMin = timeToShuttleMinEdit.text.toString().toFloat()
-                    settings.timeToShuttleMax = timeToShuttleMaxEdit.text.toString().toFloat()
-                    settings.timeToCenterMin = timeToCenterMinEdit.text.toString().toFloat()
-                    settings.timeToCenterMax = timeToCenterMaxEdit.text.toString().toFloat()
-                    settings.numberDisplayTime = numberDisplayTimeEdit.text.toString().toFloat()
+                    var validationFailed = false
+                    var errorMessage = ""
 
+                    // Save common settings
+                    settings.numberDisplayTime = numberDisplayTimeEdit.text.toString().toFloat()
                     settings.repMode = if (infiniteRepsRadio.isChecked) "infinite" else "fixed"
                     if (settings.repMode == "fixed") {
                         settings.targetReps = targetRepsEdit.text.toString().toInt()
                     }
 
-                    var validationFailed = false
-                    var errorMessage = ""
-
                     // Save drill-specific settings based on current drill
                     when (settings.currentDrill) {
                         "drill1" -> {
-                            // Save drill 1 settings
                             settings.minShuttleNumber = minShuttleNumberEdit.text.toString().toInt()
                             settings.maxShuttleNumber = maxShuttleNumberEdit.text.toString().toInt()
+                            settings.drill1TimeToShuttleMin = timeToShuttleMinEdit.text.toString().toFloat()
+                            settings.drill1TimeToShuttleMax = timeToShuttleMaxEdit.text.toString().toFloat()
+                            settings.drill1TimeToCenterMin = timeToCenterMinEdit.text.toString().toFloat()
+                            settings.drill1TimeToCenterMax = timeToCenterMaxEdit.text.toString().toFloat()
 
-                            // Validation for drill 1
                             if (settings.minShuttleNumber >= settings.maxShuttleNumber) {
                                 validationFailed = true
                                 errorMessage = "Min number must be less than max number"
                             }
+                            if (settings.drill1TimeToShuttleMin > settings.drill1TimeToShuttleMax) {
+                                validationFailed = true
+                                errorMessage = "Time to shuttle min must be ≤ max"
+                            }
+                            if (settings.drill1TimeToCenterMin > settings.drill1TimeToCenterMax) {
+                                validationFailed = true
+                                errorMessage = "Time to center min must be ≤ max"
+                            }
                         }
                         "drill2" -> {
-                            // Save drill 2 settings (shot probabilities)
-                            val netProb = netProbEdit.text.toString().toInt()
-                            val liftProb = liftProbEdit.text.toString().toInt()
-                            val dropProb = dropProbEdit.text.toString().toInt()
-                            val clearProb = clearProbEdit.text.toString().toInt()
-                            val smashProb = smashProbEdit.text.toString().toInt()
+                            // Save Drill 2 time to shuttle
+                            settings.drill2TimeToShuttleMin = timeToShuttleMinEdit2.text.toString().toFloat()
+                            settings.drill2TimeToShuttleMax = timeToShuttleMaxEdit2.text.toString().toFloat()
 
-                            // Enhanced validation for drill 2
-                            // Check for negative values
-                            if (netProb < 0 || liftProb < 0 || dropProb < 0 || clearProb < 0 || smashProb < 0) {
+                            if (settings.drill2TimeToShuttleMin > settings.drill2TimeToShuttleMax) {
                                 validationFailed = true
-                                errorMessage = "Probabilities must be non-negative (0-100)"
+                                errorMessage = "Time to shuttle min must be ≤ max"
                             }
 
-                            // Check for values > 100
-                            if (!validationFailed && (netProb > 100 || liftProb > 100 || dropProb > 100 || clearProb > 100 || smashProb > 100)) {
-                                validationFailed = true
-                                errorMessage = "Probabilities must be ≤ 100%"
-                            }
-
-                            // For shuttle 1 & 2 (front court) - percentages must add up to 100%
+                            // Save shot probabilities
                             if (!validationFailed) {
-                                val frontTotal = netProb + liftProb
-                                if (frontTotal != 100) {
+                                val netProb = netProbEdit.text.toString().toInt()
+                                val liftProb = liftProbEdit.text.toString().toInt()
+                                val dropProb = dropProbEdit.text.toString().toInt()
+                                val clearProb = clearProbEdit.text.toString().toInt()
+                                val smashProb = smashProbEdit.text.toString().toInt()
+
+                                if (netProb < 0 || liftProb < 0 || dropProb < 0 || clearProb < 0 || smashProb < 0) {
                                     validationFailed = true
-                                    errorMessage = "Sum of Front court shots: $frontTotal% (must be 100%)"
+                                    errorMessage = "Probabilities must be non-negative (0-100)"
+                                } else if (netProb > 100 || liftProb > 100 || dropProb > 100 || clearProb > 100 || smashProb > 100) {
+                                    validationFailed = true
+                                    errorMessage = "Probabilities must be ≤ 100%"
+                                } else {
+                                    val frontTotal = netProb + liftProb
+                                    if (frontTotal != 100) {
+                                        validationFailed = true
+                                        errorMessage = "Sum of Front court shots: $frontTotal% (must be 100%)"
+                                    } else {
+                                        val rearTotal = dropProb + clearProb + smashProb
+                                        if (rearTotal != 100) {
+                                            validationFailed = true
+                                            errorMessage = "Sum of Rear court shots: $rearTotal% (must be 100%)"
+                                        } else {
+                                            settings.shotProbabilities = mapOf(
+                                                "net" to netProb,
+                                                "lift" to liftProb,
+                                                "drop" to dropProb,
+                                                "clear" to clearProb,
+                                                "smash" to smashProb
+                                            )
+                                        }
+                                    }
                                 }
                             }
 
-                            // For shuttle 3 & 4 (rear court) - percentages must add up to 100%
+                            // Save shot-specific time ranges
                             if (!validationFailed) {
-                                val rearTotal = dropProb + clearProb + smashProb
-                                if (rearTotal != 100) {
-                                    validationFailed = true
-                                    errorMessage = "Sum of Rear court shots: $rearTotal% (must be 100%)"
-                                }
-                            }
+                                val netMin = netTimeMinEdit.text.toString().toFloat()
+                                val netMax = netTimeMaxEdit.text.toString().toFloat()
+                                val liftMin = liftTimeMinEdit.text.toString().toFloat()
+                                val liftMax = liftTimeMaxEdit.text.toString().toFloat()
+                                val dropMin = dropTimeMinEdit.text.toString().toFloat()
+                                val dropMax = dropTimeMaxEdit.text.toString().toFloat()
+                                val clearMin = clearTimeMinEdit.text.toString().toFloat()
+                                val clearMax = clearTimeMaxEdit.text.toString().toFloat()
+                                val smashMin = smashTimeMinEdit.text.toString().toFloat()
+                                val smashMax = smashTimeMaxEdit.text.toString().toFloat()
 
-                            if (!validationFailed) {
-                                // Save probabilities
-                                settings.shotProbabilities = mapOf(
-                                    "net" to netProb,
-                                    "lift" to liftProb,
-                                    "drop" to dropProb,
-                                    "clear" to clearProb,
-                                    "smash" to smashProb
-                                )
+                                if (netMin > netMax || netMin < 0 || netMax < 0) {
+                                    validationFailed = true
+                                    errorMessage = "Invalid Net shot time range"
+                                } else if (liftMin > liftMax || liftMin < 0 || liftMax < 0) {
+                                    validationFailed = true
+                                    errorMessage = "Invalid Lift time range"
+                                } else if (dropMin > dropMax || dropMin < 0 || dropMax < 0) {
+                                    validationFailed = true
+                                    errorMessage = "Invalid Drop shot time range"
+                                } else if (clearMin > clearMax || clearMin < 0 || clearMax < 0) {
+                                    validationFailed = true
+                                    errorMessage = "Invalid Clear time range"
+                                } else if (smashMin > smashMax || smashMin < 0 || smashMax < 0) {
+                                    validationFailed = true
+                                    errorMessage = "Invalid Smash time range"
+                                } else {
+                                    settings.shotTimeToCenter = mapOf(
+                                        "net" to ShotTimeRange(min = netMin, max = netMax),
+                                        "lift" to ShotTimeRange(min = liftMin, max = liftMax),
+                                        "drop" to ShotTimeRange(min = dropMin, max = dropMax),
+                                        "clear" to ShotTimeRange(min = clearMin, max = clearMax),
+                                        "smash" to ShotTimeRange(min = smashMin, max = smashMax)
+                                    )
+                                }
                             }
                         }
                     }
 
-                    // COMMON validation (for both drills)
+                    // Common validation
                     if (!validationFailed && settings.numberDisplayTime <= 0) {
                         validationFailed = true
                         errorMessage = "Display time must be positive"
-                    }
-
-                    if (!validationFailed && (settings.timeToShuttleMin > settings.timeToShuttleMax ||
-                                settings.timeToCenterMin > settings.timeToCenterMax)) {
-                        validationFailed = true
-                        errorMessage = "Min times must be less than or equal to max times"
                     }
 
                     if (!validationFailed && settings.repMode == "fixed" && settings.targetReps <= 0) {
@@ -735,10 +861,8 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     if (validationFailed) {
-                        // Show error but don't dismiss dialog
                         Toast.makeText(this@MainActivity, errorMessage, Toast.LENGTH_SHORT).show()
                     } else {
-                        // All validation passed, save and dismiss
                         saveSettings()
                         Toast.makeText(this@MainActivity, "Settings saved", Toast.LENGTH_SHORT).show()
                         dialog.dismiss()
