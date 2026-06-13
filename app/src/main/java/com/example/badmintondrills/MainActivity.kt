@@ -30,10 +30,18 @@ data class TrainingSettings(
     // Drill 2 specific settings
     var drill2TimeToShuttleMin: Float = 1.0f,
     var drill2TimeToShuttleMax: Float = 3.0f,
+
+    // NEW: Separate time ranges for front and back court
+    var drill2FrontCourtTimeToShuttleMin: Float = 1.0f,
+    var drill2FrontCourtTimeToShuttleMax: Float = 2.0f,
+    var drill2BackCourtTimeToShuttleMin: Float = 2.0f,
+    var drill2BackCourtTimeToShuttleMax: Float = 3.0f,
+
     var numberDisplayTime: Float = 0.5f,
     var repMode: String = "infinite",
     var targetReps: Int = 10,
     var soundEnabled: Boolean = true,
+    var speechRate: Float = 1.0f,  // 1.0 is normal, >1.0 is faster
 
     // Drill 2 shot probabilities
     var shotProbabilities: Map<String, Int> = mapOf(
@@ -220,6 +228,7 @@ class MainActivity : AppCompatActivity() {
             if (status == TextToSpeech.SUCCESS) {
                 ttsInitialized = true
                 textToSpeech.language = Locale.getDefault()
+                textToSpeech.setSpeechRate(settings.speechRate)  // Add this line
             }
         }
     }
@@ -392,11 +401,16 @@ class MainActivity : AppCompatActivity() {
     private fun startTimeToShuttlePhase() {
         currentPhase = Phase.TIME_TO_SHUTTLE
 
-        // Get the appropriate time range based on current drill
+        // Get the appropriate time range based on current drill and shuttle number
         val (minTime, maxTime) = if (settings.currentDrill == "drill1") {
             Pair(settings.drill1TimeToShuttleMin, settings.drill1TimeToShuttleMax)
         } else {
-            Pair(settings.drill2TimeToShuttleMin, settings.drill2TimeToShuttleMax)
+            // For Drill 2, use different ranges based on shuttle number
+            when (shuttleNumber) {
+                1, 2 -> Pair(settings.drill2FrontCourtTimeToShuttleMin, settings.drill2FrontCourtTimeToShuttleMax)
+                3, 4 -> Pair(settings.drill2BackCourtTimeToShuttleMin, settings.drill2BackCourtTimeToShuttleMax)
+                else -> Pair(settings.drill2TimeToShuttleMin, settings.drill2TimeToShuttleMax) // fallback
+            }
         }
 
         // Randomly select time between min and max
@@ -406,7 +420,7 @@ class MainActivity : AppCompatActivity() {
         val totalMilliseconds = (timeToShuttleDuration * 1000).toLong()
         var elapsedMilliseconds = 0L
 
-        // Show timer bar (it's already taking up space because we use invisible instead of gone)
+        // Show timer bar
         timerBar.max = 1000
         timerBar.progress = 1000
         timerBar.progressDrawable = getDrawable(R.drawable.custom_progress_green)
@@ -414,19 +428,22 @@ class MainActivity : AppCompatActivity() {
         timerBar.visibility = View.VISIBLE
         timerText.visibility = View.VISIBLE
 
-        // Show the status text
+        // Show the status text with court position info for Drill 2
         countdownStatus.visibility = View.VISIBLE
-        countdownStatus.text = "Time to shuttle:"
+        countdownStatus.text = if (settings.currentDrill == "drill2") {
+            val courtPosition = if (shuttleNumber in 1..2) "FRONT COURT" else "BACK COURT"
+            "Time to shuttle ($courtPosition):"
+        } else {
+            "Time to shuttle:"
+        }
 
         // Keep dynamic content visible for drill 2
         if (settings.currentDrill == "drill2") {
-            // Content already visible, just make sure
             dynamicContentContainer.visibility = View.VISIBLE
             shuttleNumberText.visibility = View.VISIBLE
             shotChoiceText.visibility = View.VISIBLE
             directionArrowText.visibility = View.VISIBLE
         } else {
-            // For drill 1, hide the dynamic content
             dynamicContentContainer.visibility = View.GONE
         }
 
@@ -445,7 +462,7 @@ class MainActivity : AppCompatActivity() {
 
                 if (elapsedMilliseconds >= totalMilliseconds) {
                     // Time to shuttle complete
-                    timerBar.visibility = View.INVISIBLE  // Use invisible instead of gone
+                    timerBar.visibility = View.INVISIBLE
                     timerText.visibility = View.INVISIBLE
 
                     // Hide shot and direction after "Hit" command
@@ -598,6 +615,8 @@ class MainActivity : AppCompatActivity() {
         val targetRepsEdit = dialogView.findViewById<EditText>(R.id.targetRepsEdit)
         val infiniteRepsRadio = dialogView.findViewById<RadioButton>(R.id.infiniteRepsRadio)
         val fixedRepsRadio = dialogView.findViewById<RadioButton>(R.id.fixedRepsRadio)
+        val speechRateSeekBar = dialogView.findViewById<SeekBar>(R.id.speechRateSeekBar)
+        val speechRateValue = dialogView.findViewById<TextView>(R.id.speechRateValue)
 
         // Drill-specific settings containers
         val drill1Settings = dialogView.findViewById<LinearLayout>(R.id.drill1Settings)
@@ -613,8 +632,10 @@ class MainActivity : AppCompatActivity() {
         val timeToCenterMaxEdit = dialogView.findViewById<EditText>(R.id.timeToCenterMaxEdit)
 
         // Drill 2 specific fields
-        val timeToShuttleMinEdit2 = dialogView.findViewById<EditText>(R.id.timeToShuttleMinEdit2)
-        val timeToShuttleMaxEdit2 = dialogView.findViewById<EditText>(R.id.timeToShuttleMaxEdit2)
+        val frontCourtTimeMinEdit = dialogView.findViewById<EditText>(R.id.frontCourtTimeMinEdit)
+        val frontCourtTimeMaxEdit = dialogView.findViewById<EditText>(R.id.frontCourtTimeMaxEdit)
+        val backCourtTimeMinEdit = dialogView.findViewById<EditText>(R.id.backCourtTimeMinEdit)
+        val backCourtTimeMaxEdit = dialogView.findViewById<EditText>(R.id.backCourtTimeMaxEdit)
 
         // Drill 2 shot probabilities
         val netProbEdit = dialogView.findViewById<EditText>(R.id.netProbEdit)
@@ -664,12 +685,17 @@ class MainActivity : AppCompatActivity() {
         timeToCenterMaxEdit.setText(settings.drill1TimeToCenterMax.toString())
 
         // Load Drill 2 specific values
-        timeToShuttleMinEdit2.setText(settings.drill2TimeToShuttleMin.toString())
-        timeToShuttleMaxEdit2.setText(settings.drill2TimeToShuttleMax.toString())
+        frontCourtTimeMinEdit.setText(settings.drill2FrontCourtTimeToShuttleMin.toString())
+        frontCourtTimeMaxEdit.setText(settings.drill2FrontCourtTimeToShuttleMax.toString())
+        backCourtTimeMinEdit.setText(settings.drill2BackCourtTimeToShuttleMin.toString())
+        backCourtTimeMaxEdit.setText(settings.drill2BackCourtTimeToShuttleMax.toString())
 
         // Load common values
         numberDisplayTimeEdit.setText(settings.numberDisplayTime.toString())
         targetRepsEdit.setText(settings.targetReps.toString())
+        val currentRate = settings.speechRate
+        speechRateSeekBar.progress = (currentRate * 10).toInt() - 5  // Convert 0.5-2.0 to 0-15 range
+        speechRateValue.text = String.format("%.1fx", currentRate)
 
         // Load Drill 2 shot probabilities
         netProbEdit.setText(settings.shotProbabilities["net"].toString())
@@ -699,6 +725,16 @@ class MainActivity : AppCompatActivity() {
             smashTimeMinEdit.setText(it.min.toString())
             smashTimeMaxEdit.setText(it.max.toString())
         }
+
+        // Update display when slider changes
+        speechRateSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                val rate = (progress + 5) / 10f  // Convert 0-15 to 0.5-2.0
+                speechRateValue.text = String.format("%.1fx", rate)
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
 
         // Set rep mode
         if (settings.repMode == "infinite") {
@@ -737,6 +773,8 @@ class MainActivity : AppCompatActivity() {
                     if (settings.repMode == "fixed") {
                         settings.targetReps = targetRepsEdit.text.toString().toInt()
                     }
+                    settings.speechRate = (speechRateSeekBar.progress + 5) / 10f
+                    textToSpeech.setSpeechRate(settings.speechRate)  // Apply immediately
 
                     // Save drill-specific settings based on current drill
                     when (settings.currentDrill) {
@@ -763,12 +801,25 @@ class MainActivity : AppCompatActivity() {
                         }
                         "drill2" -> {
                             // Save Drill 2 time to shuttle
-                            settings.drill2TimeToShuttleMin = timeToShuttleMinEdit2.text.toString().toFloat()
-                            settings.drill2TimeToShuttleMax = timeToShuttleMaxEdit2.text.toString().toFloat()
+                            val frontMin = frontCourtTimeMinEdit.text.toString().toFloat()
+                            val frontMax = frontCourtTimeMaxEdit.text.toString().toFloat()
+                            val backMin = backCourtTimeMinEdit.text.toString().toFloat()
+                            val backMax = backCourtTimeMaxEdit.text.toString().toFloat()
 
-                            if (settings.drill2TimeToShuttleMin > settings.drill2TimeToShuttleMax) {
+                            if (frontMin > frontMax) {
                                 validationFailed = true
-                                errorMessage = "Time to shuttle min must be ≤ max"
+                                errorMessage = "Front court time to shuttle min must be ≤ max"
+                            } else if (backMin > backMax) {
+                                validationFailed = true
+                                errorMessage = "Back court time to shuttle min must be ≤ max"
+                            } else if (frontMin < 0 || frontMax < 0 || backMin < 0 || backMax < 0) {
+                                validationFailed = true
+                                errorMessage = "Times must be positive"
+                            } else {
+                                settings.drill2FrontCourtTimeToShuttleMin = frontMin
+                                settings.drill2FrontCourtTimeToShuttleMax = frontMax
+                                settings.drill2BackCourtTimeToShuttleMin = backMin
+                                settings.drill2BackCourtTimeToShuttleMax = backMax
                             }
 
                             // Save shot probabilities
