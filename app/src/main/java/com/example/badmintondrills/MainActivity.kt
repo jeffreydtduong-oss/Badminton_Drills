@@ -42,6 +42,8 @@ data class TrainingSettings(
     var targetReps: Int = 10,
     var soundEnabled: Boolean = true,
     var speechRate: Float = 1.0f,  // 1.0 is normal, >1.0 is faster
+    var speedMultiplier: Float = 1.0f,
+
 
     // Drill 2 shot probabilities
     var shotProbabilities: Map<String, Int> = mapOf(
@@ -81,6 +83,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var startStopButton: Button
     private lateinit var settingsButton: Button
     private lateinit var soundToggle: SwitchCompat
+    private lateinit var speedMultiplierButton: Button
     private lateinit var dynamicContentContainer: LinearLayout
 
     // State Variables
@@ -195,6 +198,7 @@ class MainActivity : AppCompatActivity() {
         soundToggle = findViewById(R.id.soundToggle)
         drillSelectButton = findViewById(R.id.drillSelectButton)
         drillNameText = findViewById(R.id.drillNameText)
+        speedMultiplierButton = findViewById(R.id.speedMultiplierButton)
     }
 
     private fun loadSettings() {
@@ -215,6 +219,7 @@ class MainActivity : AppCompatActivity() {
 
         soundToggle.isChecked = settings.soundEnabled
         repCounterText.text = "Reps: 0"
+        updateSpeedMultiplierButton()
     }
 
     private fun saveSettings() {
@@ -256,6 +261,10 @@ class MainActivity : AppCompatActivity() {
 
         drillSelectButton.setOnClickListener {
             showDrillSelectionDialog()
+        }
+
+        speedMultiplierButton.setOnClickListener {
+            showSpeedMultiplierDialog()
         }
     }
 
@@ -413,9 +422,13 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Randomly select time between min and max
+        // APPLY SPEED MULTIPLIER HERE
+        val adjustedMin = minTime / settings.speedMultiplier  // Divide because higher speed = less time
+        val adjustedMax = maxTime / settings.speedMultiplier
+
+        // Randomly select time between adjusted min and max
         val random = Random()
-        timeToShuttleDuration = minTime + random.nextFloat() * (maxTime - minTime)
+        timeToShuttleDuration = adjustedMin + random.nextFloat() * (adjustedMax - adjustedMin)
 
         val totalMilliseconds = (timeToShuttleDuration * 1000).toLong()
         var elapsedMilliseconds = 0L
@@ -499,9 +512,13 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Randomly select time between min and max
+        // APPLY SPEED MULTIPLIER HERE
+        val adjustedMin = minTime / settings.speedMultiplier  // Divide because higher speed = less time
+        val adjustedMax = maxTime / settings.speedMultiplier
+
+        // Randomly select time between adjusted min and max
         val random = Random()
-        timeToCenterDuration = minTime + random.nextFloat() * (maxTime - minTime)
+        timeToCenterDuration = adjustedMin + random.nextFloat() * (adjustedMax - adjustedMin)
 
         val totalMilliseconds = (timeToCenterDuration * 1000).toLong()
         var elapsedMilliseconds = 0L
@@ -1038,5 +1055,53 @@ class MainActivity : AppCompatActivity() {
             }
             else -> Pair("net", "middle") // fallback
         }
+    }
+
+    private fun showSpeedMultiplierDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.speed_multiplier_dialog, null)
+
+        val seekBar = dialogView.findViewById<SeekBar>(R.id.speedMultiplierSeekBar)
+        val valueText = dialogView.findViewById<TextView>(R.id.speedMultiplierValue)
+        val minText = dialogView.findViewById<TextView>(R.id.speedMinText)
+        val maxText = dialogView.findViewById<TextView>(R.id.speedMaxText)
+
+        // Set range: 0.5x to 2.0x (or adjust as needed)
+        val minMultiplier = 0.5f
+        val maxMultiplier = 2.0f
+        val currentMultiplier = settings.speedMultiplier
+
+        // Convert multiplier to progress (0-100 range for easier calculation)
+        val progress = ((currentMultiplier - minMultiplier) / (maxMultiplier - minMultiplier) * 100).toInt()
+        seekBar.progress = progress
+        valueText.text = String.format("%.1fx", currentMultiplier)
+        minText.text = String.format("%.1fx", minMultiplier)
+        maxText.text = String.format("%.1fx", maxMultiplier)
+
+        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                val multiplier = minMultiplier + (progress / 100f) * (maxMultiplier - minMultiplier)
+                valueText.text = String.format("%.1fx", multiplier)
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
+
+        AlertDialog.Builder(this)
+            .setTitle("Speed Multiplier")
+            .setView(dialogView)
+            .setPositiveButton("Apply") { _, _ ->
+                val multiplier = minMultiplier + (seekBar.progress / 100f) * (maxMultiplier - minMultiplier)
+                settings.speedMultiplier = multiplier
+                saveSettings()
+                updateSpeedMultiplierButton()
+                Toast.makeText(this, "Speed set to ${String.format("%.1f", multiplier)}x", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun updateSpeedMultiplierButton() {
+        speedMultiplierButton.text = String.format("Speed: %.1fx", settings.speedMultiplier)
     }
 }
